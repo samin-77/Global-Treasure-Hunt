@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treasure Hunt Map</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        /* Responsive height: smaller on mobile, larger on desktop */
+        #map { 
+            height: 50vh; 
+            width: 100%; 
+            z-index: 1; 
+        }
+        @media (min-width: 768px) {
+            #map { height: 65vh; }
+        }
+        .treasure-found { background-color: #d1fae5; border-left: 4px solid #10b981; }
+        .treasure-hidden { background-color: #f3f4f6; border-left: 4px solid #9ca3af; }
+        .custom-marker { font-size: 28px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); cursor: pointer; }
+        /* Ensure modal is always on top and scrollable if content is long */
+        #clue-modal { z-index: 9999; }
+    </style>
+</head>
+<body class="bg-amber-50 font-sans min-h-screen flex flex-col">
+
+    <nav class="bg-amber-800 text-white p-3 md:p-4 shadow-lg sticky top-0 z-[1000]">
+        <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="text-center sm:text-left">
+                <h1 class="text-xl md:text-2xl font-black tracking-tighter sm:tracking-wider">🗺️ TREASURE HUNT</h1>
+                <p class="text-xs opacity-90 italic">Explorer: <span id="player-name-display" class="font-bold text-amber-300">Adventurer</span></p>
+            </div>
+            <div class="flex items-center gap-4 md:gap-8">
+                <div class="text-center">
+                    <p class="text-[10px] uppercase font-bold text-amber-200">Total Score</p>
+                    <p id="score-display" class="text-xl md:text-3xl font-black text-yellow-400 leading-none">0</p>
+                </div>
+                <button onclick="resetGame()" class="bg-red-600 hover:bg-red-700 text-xs md:text-sm px-3 py-2 rounded-lg font-bold shadow-md transition active:scale-95">Reset</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow">
+        <div id="map" class="sm:m-4 sm:rounded-xl shadow-inner sm:shadow-2xl border-b-4 sm:border-4 border-amber-900 bg-slate-200"></div>
+
+        <section class="container mx-auto p-4">
+            <div class="bg-white rounded-xl p-4 md:p-6 shadow-md border border-amber-200">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg md:text-xl font-bold text-amber-900 flex items-center gap-2">📜 Discovery Log</h2>
+                    <span id="progress-stats" class="text-xs font-bold text-amber-600 bg-amber-100 px-2 py-1 rounded-full">0/8 Found</span>
+                </div>
+                <div id="treasure-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                    </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center p-6 text-amber-800 opacity-60 text-xs uppercase tracking-widest">
+        &copy; 2026 Treasure Map Adventures
+    </footer>
+
+    <div id="clue-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 md:p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <div class="text-center">
+                <div class="bg-amber-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-amber-200">
+                    <span class="text-4xl">🗝️</span>
+                </div>
+                <h3 id="modal-title" class="text-xl md:text-2xl font-black text-amber-900 mb-2 uppercase tracking-tight"></h3>
+                <div class="bg-amber-50 p-4 rounded-lg border-l-4 border-amber-400 mb-6">
+                    <p id="modal-clue" class="text-gray-700 italic text-sm md:text-base leading-relaxed"></p>
+                </div>
+                
+                <input type="text" id="answer-input" autocomplete="off" placeholder="Type your answer..." 
+                       class="w-full border-2 border-amber-200 rounded-xl p-3 md:p-4 mb-4 focus:outline-none focus:border-amber-600 text-center font-bold text-lg placeholder:font-normal">
+                
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button onclick="closeModal()" class="order-2 sm:order-1 flex-1 bg-gray-100 py-3 rounded-xl font-bold text-gray-600 hover:bg-gray-200 transition">Maybe Later</button>
+                    <button id="submit-btn" class="order-1 sm:order-2 flex-[2] bg-amber-600 text-white py-3 rounded-xl font-bold text-lg hover:bg-amber-700 shadow-lg active:translate-y-1 transition">Claim Treasure</button>
+                </div>
+                <p id="feedback-msg" class="mt-4 font-black uppercase text-sm hidden"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="treasures.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
